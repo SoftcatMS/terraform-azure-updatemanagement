@@ -11,24 +11,26 @@ resource "random_string" "random_string" {
   number = true
 }
 resource "azurerm_resource_group" "update_management" {
-  name = "${var.resourcegroupname}"
+  name = "${var.resource_group_name}"
   location = var.location
+  tags = var.tags
 }
 
 resource "azurerm_automation_account" "update_management" {
-  name = "${var.automationaccountname}"
+  name = "${var.automation_account_name}"
   location = azurerm_resource_group.update_management.location
   resource_group_name = azurerm_resource_group.update_management.name
   sku_name = "Basic"
-  
+  tags = var.tags
 }
 
 resource "azurerm_log_analytics_workspace" "update_management" {
-    name = "${var.loganalyticsworkspacename}"
+    name = "${var.log_analytics_workspace_name}"
     location = azurerm_resource_group.update_management.location
     resource_group_name = azurerm_resource_group.update_management.name
     sku = "PerGB2018"
     retention_in_days = 30
+    tags = var.tags
   
 }
 
