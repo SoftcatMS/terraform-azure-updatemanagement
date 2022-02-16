@@ -11,12 +11,12 @@ resource "random_string" "random_string" {
   number = true
 }
 resource "azurerm_resource_group" "update_management" {
-  name = "${var.locationshortname}-RSG-SOFTCAT-UPDATEMANAGEMENT"
+  name = "${var.resourcegroupname}"
   location = var.location
 }
 
 resource "azurerm_automation_account" "update_management" {
-  name = "${var.locationshortname}-AAT-SOFTCAT-UPDATEMANAGEMENT"
+  name = "${var.automationaccountname}"
   location = azurerm_resource_group.update_management.location
   resource_group_name = azurerm_resource_group.update_management.name
   sku_name = "Basic"
@@ -24,7 +24,7 @@ resource "azurerm_automation_account" "update_management" {
 }
 
 resource "azurerm_log_analytics_workspace" "update_management" {
-    name = "${var.locationshortname}-LOG-SOFTCAT-UPDATEMANAGEMENT"
+    name = "${var.loganalyticsworkspacename}"
     location = azurerm_resource_group.update_management.location
     resource_group_name = azurerm_resource_group.update_management.name
     sku = "PerGB2018"

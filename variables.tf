@@ -1,12 +1,18 @@
 variable "location" {
   type = string
-  description = "Locaton to use for the deployment of resources"
+  description = "Azure locaton to use for the deployment of resources"
 }
-variable "locationshortname" {
+variable "resourcegroupname" {
   type = string
-  description = "Location three letter abbreviation"
-  validation {
-      condition = length (var.locationshortname) == 3
-      error_message = "The location shortname must be only 3 characters long."
-    }
+  description = "Azure resource group name"
+}
+
+variable "automationaccountname"{
+  type = string
+  description = "Azure autaomtion account name"
+}
+
+variable "loganalyticsworkspacename" {
+  type = string
+  description = "Azure log analytcis worksapce name"
 }
