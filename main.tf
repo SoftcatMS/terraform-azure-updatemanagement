@@ -1,8 +1,3 @@
-provider "azurerm" {
-  features { 
-  }
-}
-
 resource "random_string" "random_string" {
   length = 5
   special = false
