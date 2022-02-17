@@ -4,7 +4,7 @@
 
 resource_group1 = 'rg-example-updatemanagement'
 
-describe azure_generic_resource(resource_group: resource_group1) do
+describe azure_generic_resources(resource_group: resource_group1) do
   its('names') { should include('example-auto-acct') }
 end
 
