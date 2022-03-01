@@ -1,5 +1,5 @@
 module "updatemanagement" {
-  source                        = "git@github.com:SoftcatMS/azure-terraform-updatemanagement"
+  source                        = "git@github.com:SoftcatMS/terraform-azure-updatemanagement"
   location                      = "uksouth"
   resource_group_name           = "rg-example-updatemanagement"
   automation_account_name       = "example-auto-acct"
