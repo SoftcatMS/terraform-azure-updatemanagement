@@ -6,7 +6,7 @@ resource "azurerm_resource_group" "rg-test-updatemanagement" {
 module "updatemanagement" {
   source                        = "git@github.com:SoftcatMS/terraform-azure-updatemanagement"
   location                      = "uksouth"
-  resource_group_name           = "rg-example-updatemanagement"
+  resource_group_name           = azurerm_resource_group.rg-test-updatemanagement.name
   automation_account_name       = "example-auto-acct"
   log_analytics_workspace_name  = "example-log-workspace"
 
