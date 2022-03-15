@@ -1,5 +1,6 @@
 variable "location" {
   type = string
+  default = null
   description = "Azure locaton to use for the deployment of resources"
 }
 variable "resource_group_name" {
