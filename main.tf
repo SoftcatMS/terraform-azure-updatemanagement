@@ -1,3 +1,7 @@
+data "azurerm_resource_group" "updatemanagement" {
+  name = var.resource_group_name
+}
+
 resource "random_string" "random_string" {
   length = 5
   special = false
@@ -5,15 +9,10 @@ resource "random_string" "random_string" {
   upper = false
   number = true
 }
-resource "azurerm_resource_group" "update_management" {
-  name = "${var.resource_group_name}"
-  location = var.location
-  tags = var.tags
-}
 
 resource "azurerm_automation_account" "update_management" {
   name = "${var.automation_account_name}"
-  location = azurerm_resource_group.update_management.location
+  location = var.location != null ? var.location : data.azurerm_resource_group.updatemanagement.location
   resource_group_name = azurerm_resource_group.update_management.name
   sku_name = "Basic"
   tags = var.tags
@@ -21,7 +20,7 @@ resource "azurerm_automation_account" "update_management" {
 
 resource "azurerm_log_analytics_workspace" "update_management" {
     name = "${var.log_analytics_workspace_name}"
-    location = azurerm_resource_group.update_management.location
+    location = var.location != null ? var.location : data.azurerm_resource_group.updatemanagement.location
     resource_group_name = azurerm_resource_group.update_management.name
     sku = "PerGB2018"
     retention_in_days = 30
@@ -37,7 +36,7 @@ resource "azurerm_log_analytics_linked_service" "update_management" {
 
 resource "azurerm_log_analytics_solution" "update_management" {
   solution_name = "Updates"
-  location = azurerm_resource_group.update_management.location
+  location = var.location != null ? var.location : data.azurerm_resource_group.updatemanagement.location
   resource_group_name = azurerm_resource_group.update_management.name
   workspace_resource_id = azurerm_log_analytics_workspace.update_management.id
   workspace_name = azurerm_log_analytics_workspace.update_management.name
@@ -70,7 +69,7 @@ data "azurerm_subscription" "current" {}
 resource "azurerm_dashboard" "patching_dashboard" {
   name                  = "patching${random_string.random_string.result}"
   resource_group_name   = azurerm_resource_group.update_management.name
-  location              = azurerm_resource_group.update_management.location
+  location              = var.location != null ? var.location : data.azurerm_resource_group.updatemanagement.location
   tags = {
     hidden-title = "Softcat- Patching Dashboard"
   }

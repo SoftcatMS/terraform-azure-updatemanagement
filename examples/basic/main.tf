@@ -1,3 +1,8 @@
+resource "azurerm_resource_group" "rg-test-updatemanagement" {
+  name     = "rg-test-updatemanagement"
+  location = "uksouth"
+}
+
 module "updatemanagement" {
   source                        = "git@github.com:SoftcatMS/terraform-azure-updatemanagement"
   location                      = "uksouth"
@@ -9,4 +14,5 @@ module "updatemanagement" {
     environment = "test"
     engineer    = "ci/cd"
   }
+  depends_on = [azurerm_resource_group.rg-test-updatemanagement]
 }
