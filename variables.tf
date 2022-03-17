@@ -19,10 +19,19 @@ variable "log_analytics_workspace_name" {
 }
 
 variable "tags" {
-  description = "The tags to associate with your network and subnets."
+  description = "The default tags to be applied"
   type        = map(string)
 
   default = {
     ENV = "test"
   }
+}
+
+variable "um_loganalytics_tag" {
+  description = "The additional tag if required for the log analytics workspace"
+  type        = map(string)
+
+  default     = {
+    customtag = null
+  }  
 }

@@ -24,7 +24,7 @@ resource "azurerm_log_analytics_workspace" "update_management" {
     resource_group_name = data.azurerm_resource_group.update_management.name
     sku = "PerGB2018"
     retention_in_days = 30
-    tags = var.tags
+    tags = "${merge (var.tags, var.um_loganalytics_tag)}"
   
 }
 
