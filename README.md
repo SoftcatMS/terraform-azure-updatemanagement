@@ -1,4 +1,4 @@
-# azure-terraform-updatemanagement
+# terraform-azure-updatemanagement
 
 Deploys the resources required to setup Azure Update Management.
 
