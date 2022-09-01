@@ -27,8 +27,12 @@ variable "um_loganalytics_tag" {
   }  
 }
 
-variable "log_analytics_workspace_id" {
+variable "log_analytics_workspace_name" {
   type = string
-  description = "Azure log analytics workspace ID"
-  
+  description = "Exisitng Azure log analytics workspace name"
+}
+
+variable "log_analytics_resource_group_name" {
+  type = string
+  description = "Resource group name of where log analytics workspace currently exists"
 }

@@ -1,13 +1,14 @@
 data "azurerm_log_analytics_workspace" "log_analytics_workspace" {
-  id = var.log_analytics_workspace_id
+  name =  var.log_analytics_workspace_name
+  resource_group_name = var.log_analytics_resource_group_name
 }
 
 resource "random_string" "random_string" {
-  length = 5
+  length  = 5
   special = false
-  lower = true
-  upper = false
-  number = true
+  lower   = true
+  upper   = false
+  numeric = true
 }
 
 resource "azurerm_automation_account" "update_management" {
@@ -20,7 +21,7 @@ resource "azurerm_automation_account" "update_management" {
 
 resource "azurerm_log_analytics_linked_service" "update_management" {
   resource_group_name = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
-  workspace_id = var.log_analytics_workspace_id
+  workspace_id = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
   read_access_id = azurerm_automation_account.update_management.id
 }
 
@@ -28,7 +29,7 @@ resource "azurerm_log_analytics_solution" "update_management" {
   solution_name = "Updates"
   location = var.location != null ? var.location : data.azurerm_log_analytics_workspace.log_analytics_workspace.location
   resource_group_name = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
-  workspace_resource_id = var.log_analytics_workspace_id
+  workspace_resource_id = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
   workspace_name = data.azurerm_log_analytics_workspace.log_analytics_workspace.name
 
   plan {
@@ -40,7 +41,7 @@ resource "azurerm_log_analytics_solution" "update_management" {
 resource "azurerm_monitor_diagnostic_setting" "update_management" {
   name = "UpdateManagement"
   target_resource_id = azurerm_automation_account.update_management.id
-  log_analytics_workspace_id = var.log_analytics_workspace_id
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
 
   log {
     category = "JobLogs"
@@ -61,7 +62,7 @@ resource "azurerm_dashboard" "patching_dashboard" {
   resource_group_name   = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
   location              = var.location != null ? var.location : data.azurerm_log_analytics_workspace.log_analytics_workspace.location
   tags = {
-    hidden-title = "Softcat- Patching Dashboard"
+    hidden-title = "Softcat - Update Management Dashboard"
   }
   dashboard_properties  = <<DASH
 {

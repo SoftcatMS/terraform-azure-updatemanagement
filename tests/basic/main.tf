@@ -12,10 +12,11 @@ resource "azurerm_log_analytics_workspace" "test-log-analytics" {
 }
 
 module "updatemanagement" {
-  source                       = "../../" #Local source only used for testing
-  location                     = "uksouth"
-  automation_account_name      = "test-auto-acct"
-  log_analytics_workspace_id   = azurerm_log_analytics_workspace.test-log-analytics.id
+  source                            = "../../" #Local source only used for testing
+  location                          = "uksouth"
+  automation_account_name           = "test-auto-acct"
+  log_analytics_workspace_name      = azurerm_log_analytics_workspace.test-log-analytics.name
+  log_analytics_resource_group_name = azurerm_log_analytics_workspace.test-log-analytics.resource_group_name
 
   tags = {
     environment = "test"
