@@ -14,7 +14,6 @@ resource "azurerm_log_analytics_workspace" "test-log-analytics" {
 module "updatemanagement" {
   source                       = "../../" #Local source only used for testing
   location                     = "uksouth"
-  resource_group_name          = azurerm_resource_group.rg-test-updatemanagement.name
   automation_account_name      = "test-auto-acct"
   log_analytics_workspace_id   = azurerm_log_analytics_workspace.test-log-analytics.id
 
