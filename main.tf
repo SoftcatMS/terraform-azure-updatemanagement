@@ -44,20 +44,36 @@ resource "azurerm_monitor_diagnostic_setting" "update_management" {
   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
 
   log {
-    category = "JobLogs"
+    category  = "JobLogs"
+    enabled   = true
   }
   log {
-    category = "JobStreams"
+    category  = "JobStreams"
+    enabled   = true
   }
   log {
-    category = "DscNodeStatus"
+    category  = "DscNodeStatus"
+    enabled   = true
   }
+  log {
+    category  = "AuditEvent"
+    enabled   = false
+  }
+  metric {
+    category = "AllMetrics"
+    enabled  = false
+
+    retention_policy {
+      enabled = false
+    }
+  }
+
 
 }
 
 data "azurerm_subscription" "current" {}
 
-resource "azurerm_dashboard" "patching_dashboard" {
+resource "azurerm_portal_dashboard" "patching_dashboard" {
   name                  = "patching${random_string.random_string.result}"
   resource_group_name   = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
   location              = var.location != null ? var.location : data.azurerm_log_analytics_workspace.log_analytics_workspace.location
