@@ -62,7 +62,7 @@ resource "azurerm_dashboard" "patching_dashboard" {
   resource_group_name   = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
   location              = var.location != null ? var.location : data.azurerm_log_analytics_workspace.log_analytics_workspace.location
   tags = {
-    hidden-title = "Softcat - Update Management Dashboard"
+    hidden-title = "Softcat - UM Dashboard"
   }
   dashboard_properties  = <<DASH
 {
