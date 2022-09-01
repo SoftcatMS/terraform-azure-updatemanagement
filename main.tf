@@ -1,45 +1,36 @@
-data "azurerm_resource_group" "update_management" {
-  name = var.resource_group_name
+data "azurerm_log_analytics_workspace" "log_analytics_workspace" {
+  name =  var.log_analytics_workspace_name
+  resource_group_name = var.log_analytics_resource_group_name
 }
 
 resource "random_string" "random_string" {
-  length = 5
+  length  = 5
   special = false
-  lower = true
-  upper = false
-  number = true
+  lower   = true
+  upper   = false
+  numeric = true
 }
 
 resource "azurerm_automation_account" "update_management" {
   name = "${var.automation_account_name}"
-  location = var.location != null ? var.location : data.azurerm_resource_group.update_management.location
-  resource_group_name = data.azurerm_resource_group.update_management.name
+  location = var.location != null ? var.location : data.azurerm_log_analytics_workspace.log_analytics_workspace.location
+  resource_group_name = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
   sku_name = "Basic"
   tags = var.tags
 }
 
-resource "azurerm_log_analytics_workspace" "update_management" {
-    name = "${var.log_analytics_workspace_name}"
-    location = var.location != null ? var.location : data.azurerm_resource_group.update_management.location
-    resource_group_name = data.azurerm_resource_group.update_management.name
-    sku = "PerGB2018"
-    retention_in_days = 30
-    tags = "${merge (var.tags, var.um_loganalytics_tag)}"
-  
-}
-
 resource "azurerm_log_analytics_linked_service" "update_management" {
-  resource_group_name = data.azurerm_resource_group.update_management.name
-  workspace_id = azurerm_log_analytics_workspace.update_management.id
+  resource_group_name = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
+  workspace_id = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
   read_access_id = azurerm_automation_account.update_management.id
 }
 
 resource "azurerm_log_analytics_solution" "update_management" {
   solution_name = "Updates"
-  location = var.location != null ? var.location : data.azurerm_resource_group.update_management.location
-  resource_group_name = data.azurerm_resource_group.update_management.name
-  workspace_resource_id = azurerm_log_analytics_workspace.update_management.id
-  workspace_name = azurerm_log_analytics_workspace.update_management.name
+  location = var.location != null ? var.location : data.azurerm_log_analytics_workspace.log_analytics_workspace.location
+  resource_group_name = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
+  workspace_resource_id = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
+  workspace_name = data.azurerm_log_analytics_workspace.log_analytics_workspace.name
 
   plan {
     publisher = "Microsoft"
@@ -50,7 +41,7 @@ resource "azurerm_log_analytics_solution" "update_management" {
 resource "azurerm_monitor_diagnostic_setting" "update_management" {
   name = "UpdateManagement"
   target_resource_id = azurerm_automation_account.update_management.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.update_management.id
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
 
   log {
     category = "JobLogs"
@@ -68,10 +59,10 @@ data "azurerm_subscription" "current" {}
 
 resource "azurerm_dashboard" "patching_dashboard" {
   name                  = "patching${random_string.random_string.result}"
-  resource_group_name   = data.azurerm_resource_group.update_management.name
-  location              = var.location != null ? var.location : data.azurerm_resource_group.update_management.location
+  resource_group_name   = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
+  location              = var.location != null ? var.location : data.azurerm_log_analytics_workspace.log_analytics_workspace.location
   tags = {
-    hidden-title = "Softcat- Patching Dashboard"
+    hidden-title = "Softcat - UM Dashboard"
   }
   dashboard_properties  = <<DASH
 {
@@ -90,11 +81,11 @@ resource "azurerm_dashboard" "patching_dashboard" {
                   "inputs": [
                     {
                       "name": "id",
-                      "value": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${data.azurerm_resource_group.update_management.name}/providers/Microsoft.OperationalInsights/workspaces/${azurerm_log_analytics_workspace.update_management.name}/views/Updates(${azurerm_log_analytics_workspace.update_management.name})"
+                      "value": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name}/providers/Microsoft.OperationalInsights/workspaces/${data.azurerm_log_analytics_workspace.log_analytics_workspace.name}/views/Updates(${data.azurerm_log_analytics_workspace.log_analytics_workspace.name})"
                     },
                     {
                       "name": "solutionId",
-                      "value": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${data.azurerm_resource_group.update_management.name}/providers/Microsoft.OperationsManagement/solutions/Updates(${azurerm_log_analytics_workspace.update_management.name})",
+                      "value": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name}/providers/Microsoft.OperationsManagement/solutions/Updates(${data.azurerm_log_analytics_workspace.log_analytics_workspace.name})",
                       "isOptional": true
                     },
                     {
@@ -121,12 +112,12 @@ resource "azurerm_dashboard" "patching_dashboard" {
                   "inputs": [
                     {
                       "name": "workspaceId",
-                      "value": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${data.azurerm_resource_group.update_management.name}/providers/Microsoft.OperationalInsights/workspaces/${azurerm_log_analytics_workspace.update_management.name}",
+                      "value": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name}/providers/Microsoft.OperationalInsights/workspaces/${data.azurerm_log_analytics_workspace.log_analytics_workspace.name}",
                       "isOptional": true
                     },
                     {
                       "name": "automationAccountResourceId",
-                      "value": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${data.azurerm_resource_group.update_management.name}/providers/Microsoft.Automation/automationAccounts/${azurerm_automation_account.update_management.name}",
+                      "value": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name}/providers/Microsoft.Automation/automationAccounts/${data.azurerm_log_analytics_workspace.log_analytics_workspace.name}",
                       "isOptional": true
                     },
                     {
@@ -190,8 +181,8 @@ resource "azurerm_dashboard" "patching_dashboard" {
                       "name": "ComponentId",
                       "value": {
                         "SubscriptionId": "${data.azurerm_subscription.current.subscription_id}",
-                        "ResourceGroup": "${data.azurerm_resource_group.update_management.name}",
-                        "Name": "${azurerm_log_analytics_workspace.update_management.name}"
+                        "ResourceGroup": "${data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name}",
+                        "Name": "${data.azurerm_log_analytics_workspace.log_analytics_workspace.name}"
                       }
                     },
                     {
@@ -204,7 +195,7 @@ resource "azurerm_dashboard" "patching_dashboard" {
                     },
                     {
                       "name": "DashboardId",
-                      "value": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${data.azurerm_resource_group.update_management.name}'/providers/Microsoft.Portal/dashboards/patching${random_string.random_string.result}"
+                      "value": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name}'/providers/Microsoft.Portal/dashboards/patching${random_string.random_string.result}"
                     },
                     {
                       "name": "PartId",
@@ -216,7 +207,7 @@ resource "azurerm_dashboard" "patching_dashboard" {
                     },
                     {
                       "name": "PartSubTitle",
-                      "value": "${azurerm_log_analytics_workspace.update_management.name}"
+                      "value": "${data.azurerm_log_analytics_workspace.log_analytics_workspace.name}"
                     },
                     {
                       "name": "resourceTypeMode",
@@ -266,9 +257,9 @@ resource "azurerm_dashboard" "patching_dashboard" {
                       "name": "ComponentId",
                       "value": {
                         "SubscriptionId": "${data.azurerm_subscription.current.subscription_id}",
-                        "ResourceGroup": "${data.azurerm_resource_group.update_management.name}",
-                        "Name": "${azurerm_log_analytics_workspace.update_management.name}",
-                        "ResourceId": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourcegroups/${data.azurerm_resource_group.update_management.name}/providers/microsoft.operationalinsights/workspaces/${azurerm_log_analytics_workspace.update_management.name}"
+                        "ResourceGroup": "${data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name}",
+                        "Name": "${data.azurerm_log_analytics_workspace.log_analytics_workspace.name}",
+                        "ResourceId": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourcegroups/${data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name}/providers/microsoft.operationalinsights/workspaces/${data.azurerm_log_analytics_workspace.log_analytics_workspace.name}"
                       }
                     },
                     {
@@ -303,7 +294,7 @@ resource "azurerm_dashboard" "patching_dashboard" {
                     },
                     {
                       "name": "DashboardId",
-                      "value": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${data.azurerm_resource_group.update_management.name}/providers/Microsoft.Portal/dashboards/patching${random_string.random_string.result}"
+                      "value": "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name}/providers/Microsoft.Portal/dashboards/patching${random_string.random_string.result}"
                     },
                     {
                       "name": "PartId",
@@ -315,7 +306,7 @@ resource "azurerm_dashboard" "patching_dashboard" {
                     },
                     {
                       "name": "PartSubTitle",
-                      "value": "${azurerm_log_analytics_workspace.update_management.name}"
+                      "value": "${data.azurerm_log_analytics_workspace.log_analytics_workspace.name}"
                     },
                     {
                       "name": "resourceTypeMode",
@@ -338,7 +329,7 @@ resource "azurerm_dashboard" "patching_dashboard" {
                   "settings": {
                     "content": {
                       "PartTitle": "Missing Updates (30d)",
-                      "PartSubTitle": "${data.azurerm_resource_group.update_management.name}"
+                      "PartSubTitle": "${data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name}"
                     }
                   },
                   "asset": {
