@@ -43,21 +43,17 @@ resource "azurerm_monitor_diagnostic_setting" "update_management" {
   target_resource_id = azurerm_automation_account.update_management.id
   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
 
-  log {
+  enabled_log {
     category  = "JobLogs"
     enabled   = true
   }
-  log {
+  enabled_log {
     category  = "JobStreams"
     enabled   = true
   }
-  log {
+  enabled_log {
     category  = "DscNodeStatus"
     enabled   = true
-  }
-  log {
-    category  = "AuditEvent"
-    enabled   = false
   }
   metric {
     category = "AllMetrics"
