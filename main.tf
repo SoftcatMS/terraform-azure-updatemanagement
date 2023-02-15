@@ -45,15 +45,12 @@ resource "azurerm_monitor_diagnostic_setting" "update_management" {
 
   enabled_log {
     category  = "JobLogs"
-    enabled   = true
   }
   enabled_log {
     category  = "JobStreams"
-    enabled   = true
   }
   enabled_log {
     category  = "DscNodeStatus"
-    enabled   = true
   }
   metric {
     category = "AllMetrics"
