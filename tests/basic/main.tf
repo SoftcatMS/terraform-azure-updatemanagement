@@ -22,8 +22,10 @@ module "updatemanagement" {
     environment = "test"
     engineer    = "ci/cd"
   }
+
   depends_on = [
     azurerm_resource_group.rg-test-updatemanagement,
     azurerm_log_analytics_workspace.test-log-analytics
-    ]
+  ]
+
 }
