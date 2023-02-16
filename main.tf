@@ -1,5 +1,5 @@
 data "azurerm_log_analytics_workspace" "log_analytics_workspace" {
-  name =  var.log_analytics_workspace_name
+  name                = var.log_analytics_workspace_name
   resource_group_name = var.log_analytics_resource_group_name
 }
 
@@ -12,45 +12,45 @@ resource "random_string" "random_string" {
 }
 
 resource "azurerm_automation_account" "update_management" {
-  name = "${var.automation_account_name}"
-  location = var.location != null ? var.location : data.azurerm_log_analytics_workspace.log_analytics_workspace.location
+  name                = var.automation_account_name
+  location            = var.location != null ? var.location : data.azurerm_log_analytics_workspace.log_analytics_workspace.location
   resource_group_name = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
-  sku_name = "Basic"
-  tags = var.tags
+  sku_name            = "Basic"
+  tags                = var.tags
 }
 
 resource "azurerm_log_analytics_linked_service" "update_management" {
   resource_group_name = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
-  workspace_id = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
-  read_access_id = azurerm_automation_account.update_management.id
+  workspace_id        = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
+  read_access_id      = azurerm_automation_account.update_management.id
 }
 
 resource "azurerm_log_analytics_solution" "update_management" {
-  solution_name = "Updates"
-  location = var.location != null ? var.location : data.azurerm_log_analytics_workspace.log_analytics_workspace.location
-  resource_group_name = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
+  solution_name         = "Updates"
+  location              = var.location != null ? var.location : data.azurerm_log_analytics_workspace.log_analytics_workspace.location
+  resource_group_name   = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
   workspace_resource_id = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
-  workspace_name = data.azurerm_log_analytics_workspace.log_analytics_workspace.name
+  workspace_name        = data.azurerm_log_analytics_workspace.log_analytics_workspace.name
 
   plan {
     publisher = "Microsoft"
-    product = "OMSGallery/Updates"
+    product   = "OMSGallery/Updates"
   }
 }
 
 resource "azurerm_monitor_diagnostic_setting" "update_management" {
-  name = "UpdateManagement"
-  target_resource_id = azurerm_automation_account.update_management.id
+  name                       = "UpdateManagement"
+  target_resource_id         = azurerm_automation_account.update_management.id
   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
 
   enabled_log {
-    category  = "JobLogs"
+    category = "JobLogs"
   }
   enabled_log {
-    category  = "JobStreams"
+    category = "JobStreams"
   }
   enabled_log {
-    category  = "DscNodeStatus"
+    category = "DscNodeStatus"
   }
   metric {
     category = "AllMetrics"
@@ -61,19 +61,25 @@ resource "azurerm_monitor_diagnostic_setting" "update_management" {
     }
   }
 
+  lifecycle {
+    # https://github.com/hashicorp/terraform-provider-azurerm/pull/20203
+    ignore_changes = [log_analytics_destination_type]
+  }
+
+
 
 }
 
 data "azurerm_subscription" "current" {}
 
 resource "azurerm_portal_dashboard" "patching_dashboard" {
-  name                  = "patching${random_string.random_string.result}"
-  resource_group_name   = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
-  location              = var.location != null ? var.location : data.azurerm_log_analytics_workspace.log_analytics_workspace.location
+  name                = "patching${random_string.random_string.result}"
+  resource_group_name = data.azurerm_log_analytics_workspace.log_analytics_workspace.resource_group_name
+  location            = var.location != null ? var.location : data.azurerm_log_analytics_workspace.log_analytics_workspace.location
   tags = {
     hidden-title = "Softcat - UM Dashboard"
   }
-  dashboard_properties  = <<DASH
+  dashboard_properties = <<DASH
 {
         "lenses": {
           "0": {
